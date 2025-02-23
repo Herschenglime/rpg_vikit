@@ -12,6 +12,7 @@
 #ifndef ROS_PARAMS_HELPER_H_
 #define ROS_PARAMS_HELPER_H_
 
+#include <sstream>
 #include <string>
 #include <rclcpp/rclcpp.hpp>
 
@@ -30,11 +31,17 @@ T getParam(const rclcpp::Node::SharedPtr &nh, const std::string& name, const T& 
   if(nh->has_parameter(name))
   {
     v = nh->get_parameter(name).get_value<T>();
-    RCLCPP_INFO(nh->get_logger(), "Found parameter: %s, value: %s", name.c_str(), std::to_string(v).c_str());
+    std::ostringstream oss;
+    oss << v;
+    RCLCPP_INFO(nh->get_logger(), "Found parameter: %s, value: %s", name.c_str(), oss.str().c_str());
     return v;
   }
   else
-    RCLCPP_WARN(nh->get_logger(), "Cannot find value for parameter: %s, assigning default: %s", name.c_str(), std::to_string(defaultValue).c_str());
+  {
+    std::ostringstream oss;
+    oss << defaultValue;
+    RCLCPP_WARN(nh->get_logger(), "Cannot find value for parameter: %s, assigning default: %s", name.c_str(), oss.str().c_str());
+  }
 	  nh->declare_parameter(name, defaultValue);
   return defaultValue;
 }
@@ -49,8 +56,11 @@ T getParam(const rclcpp::Node::SharedPtr &nh, const std::string& name)
     RCLCPP_ERROR(nh->get_logger(), "Cannot find value for parameter: %s, will try again.", name.c_str());
     if ((i ++) >= 5) return T();
   }
+
+  std::ostringstream oss;
+  oss << v;
   
-  RCLCPP_INFO(nh->get_logger(), "Found parameter: %s, value: %s", name.c_str(), std::to_string(v).c_str());
+  RCLCPP_INFO(nh->get_logger(), "Found parameter: %s, value: %s", name.c_str(), oss.str().c_str());
   return v;
 }
 
