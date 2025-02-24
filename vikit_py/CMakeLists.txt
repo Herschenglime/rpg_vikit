@@ -1,25 +1,31 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(vikit_py)
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  rospy
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
+find_package(rclpy REQUIRED)
+
+# set dependencies
+set(dependencies
+rclpy
 )
 
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-catkin_python_setup()
+#install python modules
+# ament_python_install_package(${PROJECT_NAME})
 
-catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES vikit_py
-#  CATKIN_DEPENDS rospy
-#  DEPENDS system_lib
+#install python executables
+install(PROGRAMS
+  src/vikit_py/align_trajectory.py
+  src/vikit_py/cpu_info.py
+  src/vikit_py/depthmap_utils.py
+  src/vikit_py/math_utils.py
+  src/vikit_py/ros_node.py
+  src/vikit_py/transformations.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
+#--------------------------------------------------------------------
+# export dependencies
+ament_export_dependencies(${dependencies})
+ament_package()

@@ -19,5 +19,5 @@ class RosNode:
         self.add_parameters(namespace, parameter_dictionary)
         print('Starting ROS node with parameters: '+self._param_string)
         
-        os.system('rosrun ' + self._package + ' ' + self._executable + ' ' + self._param_string)
+        os.system('ros2 run ' + self._package + ' ' + self._executable + ' ' + self._param_string)
         print('ROS node finished processing.')
