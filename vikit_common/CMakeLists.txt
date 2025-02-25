@@ -95,7 +95,7 @@ TARGET_LINK_LIBRARIES(test_vk_common_patch_score ${PROJECT_NAME} ${OpenCV_LIBS})
 ################################################################################
 # Create the vikit_commonConfig.cmake file for other cmake projects.
 IF(NOT USE_ROS)
-  # 在 CMake 3.6 及以后的版本中，不再允许从目标中读取 LOCATION 属性
+  # In CMake 3.6 and later, reading the LOCATION property from a target is no longer allowed.
   # GET_TARGET_PROPERTY( FULL_LIBRARY_NAME ${PROJECT_NAME} LOCATION )
   set(VIKIT_COMMON_LOCATION $<TARGET_FILE:vikit_common>)
   SET(vikit_common_LIBRARIES ${FULL_LIBRARY_NAME} )
