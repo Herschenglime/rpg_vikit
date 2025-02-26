@@ -16,8 +16,7 @@ namespace camera_loader {
 bool loadFromRosNs(const rclcpp::Node::SharedPtr & nh, const std::string& ns, vk::AbstractCamera*& cam)
 {
   bool res = true;
-  // std::string cam_model(getParam<std::string>(nh, ns+"/cam_model", "Pinhole"));
-  std::string cam_model("Pinhole");
+  std::string cam_model(getParam<std::string>(ns, "cam_model", ""));
   if(cam_model == "Ocam")
   {
     cam = new vk::OmniCamera(getParam<std::string>(nh, ns+"/cam_calib_file", ""));
@@ -25,28 +24,17 @@ bool loadFromRosNs(const rclcpp::Node::SharedPtr & nh, const std::string& ns, vk
   else if(cam_model == "Pinhole")
   {
     cam = new vk::PinholeCamera(
-        // getParam<int>(nh, ns+"/cam_width"),
-        // getParam<int>(nh, ns+"/cam_height"),
-        // getParam<double>(nh, ns+"/scale", 1.0),
-        // getParam<double>(nh, ns+"/cam_fx"),
-        // getParam<double>(nh, ns+"/cam_fy"),
-        // getParam<double>(nh, ns+"/cam_cx"),
-        // getParam<double>(nh, ns+"/cam_cy"),
-        // getParam<double>(nh, ns+"/cam_d0", 0.0),
-        // getParam<double>(nh, ns+"/cam_d1", 0.0),
-        // getParam<double>(nh, ns+"/cam_d2", 0.0),
-        // getParam<double>(nh, ns+"/cam_d3", 0.0));
-        1280,
-        1024,
-        0.5,
-        1293.56944,
-        1293.3155,
-        626.91359,
-        522.799224,
-        -0.076160,
-        0.123001,
-        -0.00113,
-        0.000251);
+        getParam<int>(ns, "cam_width"),
+        getParam<int>(ns, "cam_height"),
+        getParam<double>(ns, "scale", 1.0),
+        getParam<double>(ns, "cam_fx"),
+        getParam<double>(ns, "cam_fy"),
+        getParam<double>(ns, "cam_cx"),
+        getParam<double>(ns, "cam_cy"),
+        getParam<double>(ns, "cam_d0", 0.0),
+        getParam<double>(ns, "cam_d1", 0.0),
+        getParam<double>(ns, "cam_d2", 0.0),
+        getParam<double>(ns, "cam_d3", 0.0));
   }
   else if(cam_model == "EquidistantCamera")
   {

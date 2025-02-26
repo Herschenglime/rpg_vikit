@@ -15,8 +15,86 @@
 #include <sstream>
 #include <string>
 #include <rclcpp/rclcpp.hpp>
+#include <iostream>
+#include <thread>
+#include <future>
+#include <cstdio>
+#include <stdexcept>
+#include <sstream>
 
 namespace vk {
+
+template <typename T>
+T getParam(const std::string& node, const std::string& name, const T& defaultValue) {
+    try {
+        std::promise<std::string> resultPromise;
+        std::future<std::string> resultFuture = resultPromise.get_future();
+
+        std::thread([node, name, promise = std::move(resultPromise)]() mutable {
+            try {
+                std::string command = "ros2 param get /" + node + " " + name;
+                FILE* pipe = popen(command.c_str(), "r");
+                if (!pipe) {
+                    throw std::runtime_error("popen() failed!");
+                }
+                char buffer[128];
+                std::string result = "";
+                while (!feof(pipe)) {
+                    if (fgets(buffer, 128, pipe) != nullptr) {
+                        result += buffer;
+                    }
+                }
+                auto rc = pclose(pipe);
+                if (rc != 0) {
+                    throw std::runtime_error("Command failed with return code: " + std::to_string(rc));
+                }
+
+                // parse the result
+                size_t pos = result.find(": ");
+                if (pos != std::string::npos) {
+                    promise.set_value(result.substr(pos + 2)); // return the substring after ":"
+                } else {
+                    promise.set_value(""); // if not found ":", return empty string
+                }
+            } catch (const std::exception& e) {
+                promise.set_exception(std::make_exception_ptr(e));
+            }
+        }).detach();
+
+        std::string valueStr = resultFuture.get();
+
+        // size check
+        if (!valueStr.empty()) {
+            // type covert
+            std::stringstream ss(valueStr);
+            T value;
+            if (ss >> value) {
+                return value;
+            } else {
+                return defaultValue; // convert failed, return default value
+            }
+        } else {
+            return defaultValue; // size 0 , return default value
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return defaultValue; // some exception, return default value
+    }
+}
+
+template <typename T>
+T getParam(const std::string& node, const std::string& name) {
+    // override function could has no default value
+    if constexpr (std::is_same_v<T, std::string>) {
+        return getParam<T>(node, name, ""); // if std::string, default value is ""
+    } else if constexpr (std::is_integral_v<T>) {
+        return getParam<T>(node, name, 0); // if int. defalt 0
+    } else if constexpr (std::is_floating_point_v<T>) {
+        return getParam<T>(node, name, 0.0); // if float，default 0.0
+    } else {
+        throw std::runtime_error("Unsupported type for getParam without default value.");
+    }
+}
 
 inline
 bool hasParam(const rclcpp::Node::SharedPtr &nh, const std::string& name)
