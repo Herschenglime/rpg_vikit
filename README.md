@@ -1,6 +1,8 @@
 VIKIT
 -----
 
+> Notice: A special method in this Vikit to get the camera parameters. The method I currently provide is straightforward and imperfect, but it may meet my current needs for the transition stage. I hope more contributions to improve the ROS2 HUMBLE version of rpg_vikit.
+
 Vikit (Vision-Kit) provides some tools for your vision/robotics project.
 Far from stable.
 
