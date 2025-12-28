@@ -30,8 +30,6 @@ SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -fsee -fomit-frame-pointer -
 # Add plain cmake packages 
 FIND_PACKAGE(OpenCV REQUIRED)
 FIND_PACKAGE(Eigen REQUIRED)
-set(Sophus_DIR /opt/ros/jazzy/share/sophus/cmake/)
-set(Sophus_INCLUDE_DIRS /opt/ros/jazzy/include/)
 FIND_PACKAGE(Sophus REQUIRED)
 FIND_PACKAGE(fmt REQUIRED)
 
