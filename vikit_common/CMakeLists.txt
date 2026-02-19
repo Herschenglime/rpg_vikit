@@ -6,18 +6,17 @@ SET(CMAKE_VERBOSE_MAKEFILE OFF)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMakeModules/")
 SET(USE_ROS False) # Set False if you want to build this package without Catkin
 
-# Set build flags. Set IS_ARM on odroid board as environment variable
-SET(CMAKE_CXX_FLAGS "-Wall -D_LINUX -D_REENTRANT -march=native -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unknown-pragmas")
-IF(DEFINED ENV{ARM_ARCHITECTURE})
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon -march=armv8-a")
-ELSE()
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmmx -msse -msse -msse2 -msse3 -mssse3")
-ENDIF()
-message("Current CPU archtecture: ${CMAKE_SYSTEM_PROCESSOR}")
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)" )
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmmx -msse -msse -msse2 -msse3 -mssse3")
-else()
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=armv8-a")
+message("Current CPU architecture: ${CMAKE_SYSTEM_PROCESSOR}")
+
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
+  # Intel/AMD flags (SSE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse -msse2 -msse3 -mssse3")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "(aarch64)|(arm64)")
+  # Jetson / 64-bit ARM flags (NEON is implicit, no -mfpu needed)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=armv8-a")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+  # Older 32-bit ARM (Raspberry Pi 2, etc) - THIS needs -mfpu=neon
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon -march=armv7-a")
 endif()
 
 IF(CMAKE_COMPILER_IS_GNUCC)
@@ -74,7 +73,9 @@ LIST(APPEND SOURCEFILES src/atan_camera.cpp
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCEFILES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}
   ${OpenCV_LIBS}
-  ${Sophus_LIBRARIES}
+  # ${Sophus_LIBRARIES}
+  # changed on gemini suggestion: link to sophus directly
+  Sophus::Sophus
   fmt::fmt)
 
 IF(USE_ROS)
